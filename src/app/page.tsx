@@ -1,8 +1,11 @@
+import Header from "@/components/Header/header";
 
 
 export default function Home() {
   return (
-    <h2
-    className="bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"> home </h2>
+    <main
+    className="flex flex-col min-h-screen bg-[var(--background)]">
+      <Header/>
+    </main>
   );
 }

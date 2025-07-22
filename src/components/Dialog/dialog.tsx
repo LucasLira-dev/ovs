@@ -24,25 +24,35 @@ export function DialogComponent() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Formulário enviado");
+
     setSalvando(true); // Indica que o salvamento está em progresso
 
     const formData = new FormData(event.currentTarget); //pega os dados do formulário
-    const userName = formData.get('name');
-    const profession = formData.get('profissão');
-    const age = formData.get('idade');
-
-    // Verifica se os campos obrigatórios estão preenchidos
-    if (!userName || !profession || !age) {
+    if(
+      !formData.get('name') ||
+      !formData.get('profissão') ||
+      !formData.get('idade') ||
+      !formData.get('imagem')
+    ) {
       alert("Por favor, preencha todos os campos obrigatórios.");
+      setSalvando(false); // Reseta o estado de salvamento
       return;
     }
+    
+    try {
+      await registerServices.createUser(formData); // Envia os dados do formulário para o serviço de registro
+      alert("Cadastro realizado com sucesso!"); // Mensagem de sucesso
+      setOpen(false); // fecha o dialog
+      event.currentTarget.reset(); // Limpa os campos do formulário
+    } catch (error) {
+      console.error("Erro ao cadastrar usuário:", error);
+      alert("Ocorreu um erro ao cadastrar o usuário.");
+    } finally {
+      setSalvando(false); // Reseta o estado de salvamento
+      
+    }
 
-    await registerServices.createUser({
-      userName: userName as string,
-      age: Number(age),
-      profession: profession as string,
-    });
+    
 
     setOpen(false); // fecha o dialog
     setSalvando(false); // Reseta o estado de salvamento
