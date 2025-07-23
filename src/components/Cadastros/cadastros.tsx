@@ -19,13 +19,21 @@ interface ICadastrosProps{
 }
 
 export default function Cadastros({ cadastros }: ICadastrosProps){
+
+    const apiUrl = 'http://localhost:3000'
+
+
     return (
         <div className="flex flex-col gap-4 md:max-h-[73vh] overflow-y-auto">
-            {cadastros.map(([nome, profissao, idade, imagem], idx) => (
-                <article key={idx} className="bg-[var(--card)] text-[var(--foreground)] p-4 rounded-lg shadow-md flex items-center gap-4">
-                    <div className="w-[100px] h-[100px] rounded-full overflow-hidden">
-                        <Image src={imagem} alt={nome} width={100} height={100} />
-                    </div>
+    {cadastros.map(([nome, profissao, idade, imagem], idx) => {
+        const imagePath = imagem ? imagem.replace(/\\/g, '/') : '';
+        const imagemUrl = `${apiUrl}/${imagePath}`;
+
+        return (
+        <article key={idx} className="bg-[var(--card)] text-[var(--foreground)] p-4 rounded-lg shadow-md flex items-center gap-4">
+            <div className="w-[100px] h-[100px] rounded-full overflow-hidden ">
+                <Image src={imagemUrl} alt={nome} width={100} height={100} className="object-cover w-full h-full" />
+            </div>
                     <div className="flex-1">
                         <p className="font-bold text-lg">{nome}</p>
                         <p className="text-[var(--text-tertiary)]">{profissao}</p>
@@ -102,7 +110,8 @@ export default function Cadastros({ cadastros }: ICadastrosProps){
                         </Dialog>
                     </div>
                 </article>
-            ))}
+                );
+            })}
         </div>
     );
 }

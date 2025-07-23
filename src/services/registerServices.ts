@@ -22,7 +22,15 @@ export const registerServices = {
             body: formData, // Envia o FormData diretamente
             // NÃO coloque Content-Type, o browser define automaticamente!
         });
+        
         return response.json();
     },
     // Adicione outros métodos de serviço conforme necessário
+    getAllUsers: async () =>{
+        const response = await fetch(`http://localhost:3000/users/all-users`);
+        if (!response.ok) {
+            throw new Error('Erro ao buscar usuários');
+        }
+        return response.json();
+    }
 }

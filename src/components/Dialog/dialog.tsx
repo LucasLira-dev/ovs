@@ -17,7 +17,7 @@ import { IoMdAdd } from "react-icons/io"
 
 import { registerServices } from "@/services/registerServices"
 
-export function DialogComponent() {
+export function DialogComponent({ onRegister }: { onRegister?: () => void }) {
 
   const [open, setOpen] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -29,10 +29,10 @@ export function DialogComponent() {
 
     const formData = new FormData(event.currentTarget); //pega os dados do formulário
     if(
-      !formData.get('name') ||
-      !formData.get('profissão') ||
-      !formData.get('idade') ||
-      !formData.get('imagem')
+      !formData.get('userName') ||
+      !formData.get('profession') ||
+      !formData.get('age') ||
+      !formData.get('file')
     ) {
       alert("Por favor, preencha todos os campos obrigatórios.");
       setSalvando(false); // Reseta o estado de salvamento
@@ -42,8 +42,10 @@ export function DialogComponent() {
     try {
       await registerServices.createUser(formData); // Envia os dados do formulário para o serviço de registro
       alert("Cadastro realizado com sucesso!"); // Mensagem de sucesso
+      if (onRegister) {
+        onRegister(); // Chama a função de callback se fornecida
+      }
       setOpen(false); // fecha o dialog
-      event.currentTarget.reset(); // Limpa os campos do formulário
     } catch (error) {
       console.error("Erro ao cadastrar usuário:", error);
       alert("Ocorreu um erro ao cadastrar o usuário.");
@@ -52,13 +54,7 @@ export function DialogComponent() {
       
     }
 
-    
-
-    setOpen(false); // fecha o dialog
-    setSalvando(false); // Reseta o estado de salvamento
-    alert("Cadastro realizado com sucesso!"); // Mensagem de sucesso
-    event.currentTarget.reset(); // Limpa os campos do formulário
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -79,24 +75,24 @@ export function DialogComponent() {
               Adicione um novo membro à sua equipe. Preencha os campos abaixo com as informações necessárias.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4">
+          <div className="grid gap-4 mt-2">
             <div className="grid gap-3">
               <Label htmlFor="name-1">Nome</Label>
-              <Input id="name-1" name="name" required />
+              <Input id="name-1" name="userName" required />
             </div>
             <div className="grid gap-3">
               <Label htmlFor="profissão-1"> Profissão </Label>
-              <Input id="profissão-1" name="profissão" required />
+              <Input id="profissão-1" name="profession" required />
             </div>
             <div className="grid gap-3">
               <Label htmlFor="idade-1"> Idade </Label>
-              <Input id="idade-1" name="idade" type="number" required />
+              <Input id="idade-1" name="age" type="number" required />
             </div>
             <div className="grid gap-3">
               <Label htmlFor="imagem-1">Foto</Label>
               <input
                 id="imagem-1"
-                name="imagem"
+                name="file"
                 type="file"
                 accept="image/*"
                 className="block w-full text-sm text-[var(--foreground)] file:mr-4 file:py-2 file:px-2 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[var(--neural-blue)] file:text-black hover:file:bg-[var(--neural-cyan)] transition-colors"
