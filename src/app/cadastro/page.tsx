@@ -10,6 +10,7 @@ import { registerServices } from "@/services/registerServices";
 import LoadingComponent from "@/components/Loading/loading";
 
 type User = {
+    id: string; // ID do usuário
     userName: string;
     profession: string;
     age: number;
@@ -20,12 +21,19 @@ export default function Cadastro(){
 
     const [users, setUsers] = useState<User[]>([]); // Inicializa o estado para armazenar os usuários
     const [loading, setLoading] = useState(true)
+    const [erro, setErro ] = useState(false)
 
     useEffect(() => {
         const fetchData = async () => {
-            const allUsers = await registerServices.getAllUsers();
-            setUsers(allUsers);
-            setLoading(false)
+            try{
+                const allUsers = await registerServices.getAllUsers();
+                setUsers(allUsers);
+            }catch (e) {
+                setErro(true)
+                console.error("Erro ao buscar usuários:", e);
+            } finally {
+                setLoading(false)
+            }
         };
         fetchData();
     }, []);
@@ -35,6 +43,15 @@ export default function Cadastro(){
         return(
             <LoadingComponent/>
         )
+    }
+
+    
+    if (erro) {
+        return (
+            <main className="w-full h-screen flex flex-col items-center justify-center text-[hsl(var(--foreground))]">
+                <p className="text-red-500 text-lg mt-8 text-center">Erro ao carregar os dados. Tente novamente mais tarde.</p>
+            </main>
+        );
     }
 
     return(
@@ -66,7 +83,14 @@ export default function Cadastro(){
 
             <div
             className="p-2">
-                { users.length > 0 ? <Cadastros cadastros={users.map(c => [c.userName, c.profession, c.age, c.faceFilePath])}/> : <SemCadastros/> }
+                { users.length > 0 ? 
+                <Cadastros 
+                cadastros={users.map(c => [c.id, c.userName, c.profession, c.age, c.faceFilePath])}
+                onUpdate={async () => {
+                    const allUsers = await registerServices.getAllUsers();
+                    setUsers(allUsers);
+                }}
+                /> : <SemCadastros/> }
             </div>
             </section>
         </main>

@@ -27,10 +27,33 @@ export const registerServices = {
     },
     // Adicione outros métodos de serviço conforme necessário
     getAllUsers: async () =>{
-        const response = await fetch(`http://localhost:3000/users/all-users`);
+        const response = await fetch(`http://localhost:3000/users/get-all`);
         if (!response.ok) {
             throw new Error('Erro ao buscar usuários');
         }
         return response.json();
-    }
+    },
+
+    updateUsers: async (id: string, formData: FormData) => {
+        const response = await fetch(`${endpoint}/users/update/${id}`, {
+            method: 'PATCH',
+            body: formData, // Envia o FormData diretamente
+            // NÃO coloque Content-Type, o browser define automaticamente!
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao atualizar usuário');
+        }
+        return response.json();
+    },
+
+    deleteUser: async(id: string) => {
+        const response = await fetch(`${endpoint}/users/delete/${id}`, {
+            method: 'DELETE'
+        });
+        if (!response.ok) {
+            throw new Error('Erro ao deletar usuário');
+        }
+        return response.json();
+    },
 }
