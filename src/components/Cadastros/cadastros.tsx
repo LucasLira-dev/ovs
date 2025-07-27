@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { AlertComponent } from "../Alert/alert";
 
 import {
   Dialog,
@@ -28,6 +29,9 @@ export default function Cadastros({ cadastros, onUpdate }: ICadastrosProps){
     const [deletando, setDeletando] = useState(false);
     const [editandoId, setEditandoId] = useState<string | null>(null);
     const [deletandoId, setDeletandoId] = useState<string | null>(null);
+    const [alert, setAlert] = useState<{open: boolean, type: "success" | "error", message: string}>({
+      open: false, type: "success", message: ""
+    });
     const apiUrl = 'http://localhost:3000'
 
     async function handleEditSubmit(e: React.FormEvent<HTMLFormElement>, id: string) {
@@ -38,13 +42,21 @@ export default function Cadastros({ cadastros, onUpdate }: ICadastrosProps){
 
         try{
             await registerServices.updateUsers(id, formData);
-            alert("Cadastro atualizado com sucesso!");
+            setAlert({
+                open: true,
+                type: "success",
+                message: "Cadastro atualizado com sucesso!"
+            })
             onUpdate(); // Atualiza a lista de cadastros
             setEditandoId(null); 
         } catch(error){
             console.error("Erro ao atualizar cadastro:", error);
             setEditando(false);
-            alert("Erro ao atualizar cadastro!");
+            setAlert({
+                open: true,
+                type: "error",
+                message: "Erro ao atualizar cadastro!"
+            });
         } finally{
             setEditando(false); // Reseta o estado de edição
         }
@@ -54,19 +66,37 @@ export default function Cadastros({ cadastros, onUpdate }: ICadastrosProps){
         setDeletando(true);
         try{
             await registerServices.deleteUser(id)
-            alert("usuario deletado com sucesso")
+            setAlert({
+                open: true,
+                type: "success",
+                message: "Cadastro excluído com sucesso!"
+            })
             onUpdate()
             setDeletandoId(null);
         } catch(e){
             console.log(e)
-            alert("Erro ao deletar cadastro!")
+            setAlert({
+                open: true,
+                type: "error",
+                message: "Erro ao deletar cadastro!"
+            });
         } finally{
-            setEditando(false); // Reseta o estado de edição
+            setDeletando(false); // Reseta o estado de edição
         }
     }
 
     return (
-        <div className="flex flex-col gap-4 md:max-h-[73vh] overflow-y-auto">
+    <>
+    {alert.open && (
+        <AlertComponent
+            title={alert.type === "success" ? "Sucesso!" : "Erro!"}
+            message={alert.message}
+            type={alert.type}
+            onClose={() => setAlert({open: false, type: "success", message: ""})}
+            autoClose={true}
+        />
+    )}
+    <div className="flex flex-col gap-4 md:max-h-[73vh] overflow-y-auto">
     {cadastros.map(([id, nome, profissao, idade, imagem], idx) => {
         const imagePath = imagem ? imagem.replace(/\\/g, '/') : '';
         const imagemUrl = `${apiUrl}/${imagePath}`;
@@ -118,6 +148,7 @@ export default function Cadastros({ cadastros, onUpdate }: ICadastrosProps){
                                                 name="file"
                                                 type="file"
                                                 accept="image/*"
+                                                required
                                                 className="block w-full text-sm text-[var(--foreground)] file:mr-4 file:py-2 file:px-2 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[var(--neural-blue)] file:text-black hover:file:bg-[var(--neural-cyan)] transition-colors"
                                               />
                                             </div>
@@ -165,5 +196,6 @@ export default function Cadastros({ cadastros, onUpdate }: ICadastrosProps){
                 );
             })}
         </div>
+    </>
     );
 }

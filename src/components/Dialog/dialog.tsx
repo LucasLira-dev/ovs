@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useState } from "react";
+import { AlertComponent } from "../Alert/alert";
 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -21,6 +22,9 @@ export function DialogComponent({ onRegister }: { onRegister?: () => void }) {
 
   const [open, setOpen] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [alert, setAlert] = useState<{open: boolean, type: "success" | "error", message: string}>({
+        open: false, type: "success", message: ""
+  });
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -34,21 +38,33 @@ export function DialogComponent({ onRegister }: { onRegister?: () => void }) {
       !formData.get('age') ||
       !formData.get('file')
     ) {
-      alert("Por favor, preencha todos os campos obrigatórios.");
+      setAlert({
+        open: true,
+        type: "error",
+        message: "Por favor, preencha todos os campos obrigatórios."
+      })
       setSalvando(false); // Reseta o estado de salvamento
       return;
     }
     
     try {
       await registerServices.createUser(formData); // Envia os dados do formulário para o serviço de registro
-      alert("Cadastro realizado com sucesso!"); // Mensagem de sucesso
+      setAlert({
+        open: true,
+        type: "success",
+        message: "Cadastro realizado com sucesso!"
+      })
       if (onRegister) {
         onRegister(); // Chama a função de callback se fornecida
       }
       setOpen(false); // fecha o dialog
     } catch (error) {
       console.error("Erro ao cadastrar usuário:", error);
-      alert("Ocorreu um erro ao cadastrar o usuário.");
+      setAlert({
+        open: true,
+        type: "error",
+        message: "Erro ao cadastrar usuário"
+      })
     } finally {
       setSalvando(false); // Reseta o estado de salvamento
       
@@ -57,6 +73,16 @@ export function DialogComponent({ onRegister }: { onRegister?: () => void }) {
   }
 
   return (
+    <>
+     {alert.open && (
+        <AlertComponent
+          title={alert.type === "success" ? "Sucesso!" : "Erro!"}
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert({open: false, type: "success", message: ""})}
+          autoClose={true}
+        />
+      )}
     <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <button
@@ -95,6 +121,7 @@ export function DialogComponent({ onRegister }: { onRegister?: () => void }) {
                 name="file"
                 type="file"
                 accept="image/*"
+                required
                 className="block w-full text-sm text-[var(--foreground)] file:mr-4 file:py-2 file:px-2 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[var(--neural-blue)] file:text-black hover:file:bg-[var(--neural-cyan)] transition-colors"
               />
             </div>
@@ -116,5 +143,6 @@ export function DialogComponent({ onRegister }: { onRegister?: () => void }) {
           </form>
         </DialogContent>
     </Dialog>
+    </>
   );
 }
